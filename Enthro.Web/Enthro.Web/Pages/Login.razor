@@ -1,0 +1,51 @@
+﻿@page "/login"
+@layout EmptyLayout
+@inject NavigationManager navigationManager
+@inject IMediator mediator
+
+<div class="row justify-content-center">
+	<EditForm class="col-md-3" OnValidSubmit="OnSubmit" Model="_model">
+		<DataAnnotationsValidator />
+		<h1 class="text-center text-success mb-3">Вход</h1>
+
+		<div class="form-group">
+			<label for="userName" class="sr-only">Имя пользователя</label>
+			<InputText id="userName" class="form-control" @bind-Value="_model.UserName" autofocus placeholder="Имя пользователя" />
+			<ValidationMessage For="@(() => _model.UserName)" />
+		</div>
+
+		<div class="form-group">
+			<label for="password" class="sr-only">Пароль</label>
+			<InputText type="password" id="password" class="form-control" placeholder="Пароль" @bind-Value="_model.Password" />
+			<ValidationMessage For="@(() => _model.Password)" />
+		</div>
+
+		<button class="btn btn-lg btn-outline-success btn-block" type="submit">Войти</button>
+
+		<p class="pt-3 text-danger text-center">@_error</p>
+
+		@*<NavLink href="register">
+				<h6 class="font-weight-normal text-center">Create account</h6>
+			</NavLink>*@
+	</EditForm>
+</div>
+
+@code{
+	private LoginModel _model { get; set; } = new LoginModel();
+	private String _error { get; set; }
+
+	async Task OnSubmit()
+	{
+		_error = null;
+		try
+		{
+			await mediator.Send(new LoginCommand(_model));
+			//await authenticationService.LoginAsync(_dto);
+			navigationManager.NavigateTo("/");
+		}
+		catch (Exception ex)
+		{
+			_error = ex.Message;
+		}
+	}
+}

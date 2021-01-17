@@ -1,0 +1,12 @@
+﻿@page "/logout"
+@layout EmptyLayout
+@inject NavigationManager navigationManager
+@inject IMediator mediator
+
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		await mediator.Send(new LogoutCommand());
+		navigationManager.NavigateTo("/");
+	}
+}

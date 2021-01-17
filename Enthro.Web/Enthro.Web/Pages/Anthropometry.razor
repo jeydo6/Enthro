@@ -1,0 +1,219 @@
+﻿@using Enthro.Domain.Enumerations
+
+@page "/anthropometry"
+
+@inject IMediator mediator;
+
+<style>
+	.border-lightblue {
+		border-color: lightblue;
+	}
+
+	.border-pink {
+		border-color: pink;
+	}
+
+	.bg-lightblue {
+		background-color: #f7f7ff;
+	}
+
+	.bg-pink {
+		background-color: #fff7f7;
+	}
+</style>
+
+<h1 class="text-center text-success mb-3">Антропометрия</h1>
+
+<div id="parameters">
+	<EditForm Model="@_model" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+		<DataAnnotationsValidator />
+
+		<div class="form-row">
+			<div class="form-group col-md-12">
+				<label for="VisitDate">Дата посещения</label>
+				<InputDate @bind-Value="@_model.VisitDate" id="VisitDate" class="form-control" />
+			</div>
+
+			<div class="form-group col-md-12">
+				<label for="BirthDate">Дата рождения</label>
+				<InputDate @bind-Value="@_model.BirthDate" id="BirthDate" class="form-control" />
+			</div>
+
+			<div class="form-group col-md-12">
+				<label for="Gender">Пол</label>
+				<div id="Gender">
+					<div class="btn-group btn-group-toggle w-100" data-toggle="buttons">
+						<label class="btn @GenderValidationState @(_model.Gender == Gender.Male ? "active" : "")" @onclick="@(e => { _model.Gender = Gender.Male; _genderValidationState = true; })">
+							М
+						</label>
+						<label class="btn @GenderValidationState @(_model.Gender == Gender.Female ? "active" : "")" @onclick="@(e => { _model.Gender = Gender.Female; _genderValidationState = true; })">
+							Ж
+						</label>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group col-md-12">
+				<label for="Weight">Вес</label>
+				<div class="input-group">
+					<InputNumber @bind-Value="@_model.Weight" id="Weight" class="form-control" step="0.1" />
+					<div class="input-group-append">
+						<span class="input-group-text bg-transparent text-success">кг</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group col-md-12">
+				<label for="Height">Рост</label>
+				<div class="input-group">
+					<InputNumber @bind-Value="@_model.Height" id="Height" class="form-control" step="0.1" />
+					<div class="input-group-append">
+						<span class="input-group-text bg-transparent text-success">см</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group col-md-6 col-6">
+				<label for="FatherHeight">Рост отца</label>
+				<div class="input-group">
+					<InputNumber @bind-Value="@_model.FatherHeight" id="FatherHeight" class="form-control" step="0.1" />
+					<div class="input-group-append">
+						<span class="input-group-text bg-transparent text-success">см</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="form-group col-md-6 col-6">
+				<label for="MotherHeight">Рост матери</label>
+				<div class="input-group">
+					<InputNumber @bind-Value="@_model.MotherHeight" id="MotherHeight" class="form-control" step="0.1" />
+					<div class="input-group-append">
+						<span class="input-group-text bg-transparent text-success">см</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<button id="reset" type="reset" class="btn btn-outline-warning" @onclick="HandleReset">Сбросить</button>
+		<button id="submit" type="submit" class="btn btn-outline-success">Рассчитать</button>
+	</EditForm>
+</div>
+
+@if (_result != null)
+{
+	<div id="results">
+		@if (_result.HeightForAge != null)
+		{
+			<div class="card mt-3 @(GenderStyleState)">
+				<div class="card-body">
+					<h4 class="card-title">
+						Рост: @($"{_result.HeightForAge.Height:F2}")
+					</h4>
+					<h5 class="card-text">
+						SDS: @($"{_result.HeightForAge.SDS:F2}")
+					</h5>
+				</div>
+			</div>
+		}
+		@if (_result.BMIForAge != null)
+		{
+			<div class="card mt-3 @(GenderStyleState)">
+				<div class="card-body">
+					<h4 class="card-title">
+						Индекс массы тела: @($"{_result.BMIForAge.BMI:F2}")
+					</h4>
+					<h5 class="card-text">
+						SDS: @($"{_result.BMIForAge.SDS:F2}")
+					</h5>
+				</div>
+			</div>
+		}
+		@if (_result.TargetHeight != null)
+		{
+			<div class="card mt-3 @(GenderStyleState)">
+				<div class="card-body">
+					<h4 class="card-title">
+						Целевой рост: @($"{_result.TargetHeight.Height:F2}")
+					</h4>
+					<h5 class="card-text">
+						SDS: @($"{_result.TargetHeight.SDS:F2}")
+					</h5>
+				</div>
+			</div>
+		}
+	</div>
+}
+
+@code {
+	private AnthropometryModel _model;
+
+	private AnthropometryValueModel _result;
+
+	private Boolean _genderValidationState = true;
+	private Int32 _genderStyleState = 0;
+
+	private String GenderValidationState
+	{
+		get
+		{
+			return _genderValidationState ? "btn-outline-success" : "btn-outline-danger";
+		}
+	}
+
+	private String GenderStyleState
+	{
+		get
+		{
+			String result;
+			switch (_genderStyleState)
+			{
+				case 1:
+					result = "border-lightblue bg-lightblue";
+					break;
+				case 2:
+					result = "border-pink bg-pink";
+					break;
+				default:
+					result = "";
+					break;
+			}
+
+			return result;
+		}
+	}
+
+	protected override void OnInitialized()
+	{
+		_model = new AnthropometryModel();
+
+		_genderValidationState = true;
+	}
+
+	private void HandleReset()
+	{
+		_model = new AnthropometryModel();
+
+		_result = null;
+
+		_genderValidationState = true;
+		_genderStyleState = 0;
+	}
+
+	private void HandleSubmit()
+	{
+		_genderValidationState = _model.Gender.HasValue;
+		_genderStyleState = (Int32)(_model.Gender ?? 0);
+	}
+
+	private async Task HandleValidSubmit()
+	{
+		HandleSubmit();
+
+		_result = await mediator.Send(new GetAnthropometryValueQuery(_model));
+	}
+
+	private void HandleInvalidSubmit()
+	{
+		HandleSubmit();
+	}
+}

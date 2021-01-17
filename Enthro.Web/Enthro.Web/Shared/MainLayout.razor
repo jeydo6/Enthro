@@ -1,0 +1,75 @@
+﻿@inherits LayoutComponentBase
+
+<nav class="navbar navbar-light bg-white flex-row border-bottom box-shadow mb-3 py-0">
+	<div class="container">
+		<a class="navbar-brand order-1 order-md-1" href="">
+			<span class="text-success" style="font-family: 'Book Antiqua'; font-size: 3rem; line-height: 1;">E</span><span style="font-family: 'Book Antiqua'; font-size: 1.5rem; line-height: 1;">nthro</span>
+		</a>
+		<button class="navbar-toggler order-2 order-md-2" @onclick="ToggleNavMenu">
+			<span class="navbar-toggler-icon"></span>
+		</button>
+		<div class="order-4 order-md-3 mr-md-auto @CollapseNavMenu" @onclick="ToggleNavMenu">
+			<ul class="nav flex-column flex-md-row">
+				<li class="nav-item p-1">
+					<NavLink class="nav-link text-dark lead px-2" href="/anthropometry">Антропометрия</NavLink>
+				</li>
+				@*<li class="nav-item p-1">
+					<NavLink class="nav-link text-dark lead px-2" href="/contacts">Контакты</NavLink>
+				</li>*@
+			</ul>
+		</div>
+		<div class="order-3 order-md-4 mr-0">
+			<ul class="nav align-items-start align-items-md-center ">
+				<AuthorizeView>
+					<Authorized>
+						<li class="nav-item d-none d-md-inline p-1">
+							<p class="text-dark lead px-2 d-inline">@($"Здравствуйте, {context.User.Identity.Name}!")</p>
+						</li>
+						<li class="nav-item p-1">
+							<NavLink class="nav-link text-dark lead px-2" href="/logout">Выйти</NavLink>
+						</li>
+					</Authorized>
+					<NotAuthorized>
+						<li class="nav-item p-1">
+							<NavLink class="nav-link text-dark lead px-2" href="/login">Войти</NavLink>
+						</li>
+					</NotAuthorized>
+				</AuthorizeView>
+			</ul>
+		</div>
+	</div>
+</nav>
+
+<div class="container pb-3">
+	<div class="main">
+		@Body
+	</div>
+</div>
+
+<footer class="border-top footer text-muted py-0">
+	<div class="text-center">
+		&copy; Владимир Дерягин, 2019-2020
+	</div>
+</footer>
+
+@code {
+	private Boolean _collapseNavMenu = true;
+
+	private String CollapseNavMenu
+	{
+		get
+		{
+			return _collapseNavMenu ? "collapse" : null;
+		}
+	}
+
+	private void ToggleNavMenu()
+	{
+		_collapseNavMenu = !_collapseNavMenu;
+	}
+
+	private void HideNavMenu()
+	{
+		_collapseNavMenu = true;
+	}
+}
